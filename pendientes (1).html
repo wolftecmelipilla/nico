@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trabajos Pendientes | WOLFTEC SPA</title>
+
+  <!-- Tailwind CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    /* ======== Estilos base ======== */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue",
+        Helvetica, Arial, sans-serif;
+      background-image: url("bg.jpg"); /* Ajusta tu imagen de fondo */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      color: #fff;
+    }
+
+    /* ======== Topbar ======== */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background-color: #122931;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      z-index: 1001;
+    }
+    .topbar .logo-topbar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-transform: uppercase;
+      font-weight: bold;
+      color: #51c66c;
+      cursor: pointer;
+    }
+    .topbar .menu-icon {
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    /* ======== Sidebar ======== */
+    .sidebar {
+      position: fixed;
+      top: 60px;
+      left: 0;
+      width: 220px;
+      height: calc(100% - 60px);
+      background-color: #122931;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #fff;
+      transition: transform 0.3s ease;
+      z-index: 1000;
+      transform: translateX(-100%); /* Oculta por defecto en pantallas pequeñas */
+    }
+    .sidebar.open {
+      transform: translateX(0);
+    }
+    .sidebar img {
+      width: 100px;
+      margin: 1rem auto;
+      display: block;
+    }
+    .sidebar a {
+      width: 100%;
+      padding: 15px 20px;
+      text-decoration: none;
+      font-size: 18px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: background-color 0.3s ease;
+    }
+    .sidebar a:hover {
+      background-color: #51c66c;
+      color: #fff;
+    }
+    .sidebar a.active {
+      background-color: #3aa956;
+      font-weight: bold;
+    }
+
+    /* ======== Contenedor Principal ======== */
+    .content-container {
+      flex: 1;
+      margin-top: 60px; /* deja espacio para la topbar */
+      transition: margin-left 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+    .dashboard {
+      background: rgba(18, 41, 49, 0.9);
+      padding: 2rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      max-width: 1200px;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* ======== WiFi Status ======== */
+    .wifi-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: bold;
+      justify-content: center;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+    .wifi-icon {
+      width: 24px;
+      height: 24px;
+      transition: fill 0.3s ease;
+    }
+    .wifi-connected {
+      fill: #51c66c;
+      color: #51c66c;
+    }
+    .wifi-disconnected {
+      fill: red;
+      color: red;
+    }
+
+    /* ======== Sección de Ganancias ======== */
+    .ganancias-section {
+      margin-bottom: 1.5rem;
+      border: 1px solid #1a3742;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      background-color: rgba(18, 41, 49, 0.95);
+      text-align: left;
+      max-width: 600px;
+      margin: 0 auto 1.5rem auto;
+    }
+    .ganancias-section h2 {
+      font-size: 1.125rem;
+      font-weight: bold;
+      margin-bottom: 0.75rem;
+      text-align: center;
+    }
+    .ganancias-section ul {
+      list-style: disc;
+      margin-left: 1.5rem;
+    }
+    .ganancias-section li {
+      margin-bottom: 0.25rem;
+    }
+
+    /* ======== Tabla ======== */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto; /* Para scrolling horizontal en pantallas pequeñas */
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+      color: #fff;
+      background-color: #122931;
+    }
+    th, td {
+      border: 1px solid #1a3742;
+      padding: 8px;
+      text-align: center;
+      font-size: 0.875rem;
+      background-color: #122931;
+    }
+    th {
+      background-color: #122931;
+      color: #fff;
+    }
+    tbody tr:hover {
+      background-color: #0f1d24;
+    }
+
+    /* ======== Botones ======== */
+    button {
+      outline: none;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .btn {
+      background-color: #51c66c;
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+    .btn:hover {
+      background-color: #3aa956;
+      transform: scale(1.05);
+    }
+
+    /* Botones con colores específicos */
+    .route-button { background-color: #3B82F6; }
+    .route-button:hover { background-color: #2563EB; }
+    .whatsapp-button { background-color: #25D366; }
+    .whatsapp-button:hover { background-color: #128C7E; }
+    .update-time-button { background-color: #F59E0B; }
+    .update-time-button:hover { background-color: #D97706; }
+    .terminate-button { background-color: #DC2626; }
+    .terminate-button:hover { background-color: #B91C1C; }
+    .charge-button { background-color: #F59E0B; }
+    .charge-button:hover { background-color: #D97706; }
+    .start-visit-button { background-color: #4CAF50; }
+    .start-visit-button:hover { background-color: #388E3C; }
+    .upload-photos-button { background-color: #3B82F6; }
+    .upload-photos-button:hover { background-color: #2563EB; }
+
+    /* ======== Modales ======== */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 50;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+      padding-top: 60px;
+    }
+    .modal-content {
+      background-color: #122931;
+      color: #fff;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 0.75rem;
+      position: relative;
+    }
+    .close {
+      color: #aaa;
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover,
+    .close:focus {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    /* ======== Footer ======== */
+    footer {
+      background-color: #122931;
+      color: #fff;
+      text-align: center;
+      padding: 1rem;
+      position: relative;
+      bottom: 0;
+      left: 0;
+    }
+    footer i {
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ======== Responsividad ======== */
+    @media (min-width: 769px) {
+      .sidebar {
+        transform: translateX(0); /* visible en escritorio */
+      }
+      .sidebar.open ~ .content-container {
+        margin-left: 220px;
+      }
+    }
+    @media (max-width: 768px) {
+      .content-container {
+        margin-left: 0 !important;
+      }
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="logo-topbar" onclick="location.href='index.html'">
+      <i class="fas fa-tools"></i>
+      <span>WOLFTEC SPA</span>
+    </div>
+    <div class="menu-icon" id="menuIcon">
+      <i class="fas fa-bars"></i>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <img src="logo.png" alt="Logo" />
+    <a href="index.html">
+      <i class="fas fa-home"></i><span>Inicio</span>
+    </a>
+    <a href="ingreso-clientes.html">
+      <i class="fas fa-user-plus"></i><span>Ingresar cliente</span>
+    </a>
+    <a href="revisar-agenda.html">
+      <i class="fas fa-calendar-alt"></i><span>Calendario</span>
+    </a>
+    <a href="pendientes.html" class="active">
+      <i class="fas fa-tasks"></i><span>Trabajos pendientes</span>
+    </a>
+    <a href="lista-clientes.html">
+      <i class="fas fa-users"></i><span>Clientes</span>
+    </a>
+    <a href="gastos.html">
+      <i class="fas fa-wallet"></i><span>Gastos diarios</span>
+    </a>
+  </div>
+
+  <!-- Contenedor Principal -->
+  <div class="content-container" id="contentContainer">
+    <div class="dashboard">
+      <!-- Logo y botón "Volver a inicio" -->
+      <div class="flex justify-between items-center mb-6">
+        <img src="logo-wolf.png" alt="Wolftec Logo" class="h-20"/>
+        <button
+          onclick="location.href='index.html'"
+          class="btn bg-gray-600 hover:bg-gray-700"
+        >
+          <i class="fas fa-arrow-left"></i> Volver a inicio
+        </button>
+      </div>
+
+      <!-- Título principal -->
+      <h1 class="text-2xl md:text-3xl font-bold mb-4">Visitas Pendientes</h1>
+
+      <!-- Estado WiFi -->
+      <div class="wifi-status">
+        <svg id="wifiIcon" class="wifi-icon" viewBox="0 0 24 24">
+          <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"></path>
+        </svg>
+        <span id="wifiText">Desconectado</span>
+      </div>
+
+      <!-- Ganancias Diarias -->
+      <div class="ganancias-section">
+        <h2>Ganancias por Día</h2>
+        <ul id="totalesPorDia" class="text-sm">
+          <!-- Se rellena dinámicamente -->
+        </ul>
+      </div>
+
+      <!-- Tabla de pendientes -->
+      <div class="table-responsive mt-4">
+        <table>
+          <thead>
+            <tr>
+              <th>Tipo, Marca, Modelo</th>
+              <th>Nombre Cliente</th>
+              <th>Dirección</th>
+              <th>Teléfono</th>
+              <th>Fecha y Hora</th>
+              <th>Pagos</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="agendaBody">
+            <!-- Se rellena dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="flex justify-center items-center">
+      <i class="fas fa-clock fa-2x mr-2"></i>
+      <span id="current-datetime" class="text-lg"></span>
+    </div>
+    <div class="mt-2">
+      WOLFTEC SpA - Todos los derechos reservados
+    </div>
+  </footer>
+
+  <!-- MODAL: Actualizar Fecha -->
+  <div id="fechaModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('fechaModal')">&times;</span>
+      <h2 class="text-2xl font-bold mb-4">Actualización de hora WOLFTEC</h2>
+      <form id="updateDateForm" onsubmit="updateDate(event)">
+        <input type="hidden" id="updateId" />
+
+        <div class="mb-4">
+          <label for="newDate" class="block mb-2 font-bold">Nueva Fecha</label>
+          <input
+            type="date"
+            id="newDate"
+            name="newDate"
+            required
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        <div class="mb-4">
+          <label for="newTime" class="block mb-2 font-bold">Nueva Hora</label>
+          <input
+            type="time"
+            id="newTime"
+            name="newTime"
+            required
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        <div class="mb-4">
+          <button
+            type="button"
+            onclick="eliminarVisita()"
+            class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+          >
+            <i class="fas fa-trash-alt"></i> Eliminar Visita
+          </button>
+        </div>
+        <div class="flex justify-end">
+          <button
+            type="button"
+            class="btn bg-gray-400 hover:bg-gray-500"
+            onclick="closeModal('fechaModal')"
+          >
+            <i class="fas fa-times"></i> Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn bg-blue-500 hover:bg-blue-600 ml-2"
+          >
+            <i class="fas fa-sync-alt"></i> Actualizar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Subir Fotos -->
+  <div id="uploadModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('uploadModal')">&times;</span>
+      <h2 class="text-2xl font-bold mb-4">Adjuntar Fotos</h2>
+      <p>Puedes adjuntar hasta 4 fotos</p>
+      <input type="file" id="photoFiles" multiple accept="image/*" class="mt-4 mb-4" />
+      <div class="flex justify-end">
+        <button
+          onclick="sendPhotos()"
+          class="btn bg-blue-600 hover:bg-blue-700"
+        >
+          <i class="fas fa-paper-plane"></i> Enviar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Ver Ruta -->
+  <div id="routeModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('routeModal')">&times;</span>
+      <h2 class="text-2xl font-bold mb-4">Ruta al Domicilio</h2>
+      <p>Selecciona dónde quieres abrir la ruta.</p>
+      <div class="flex flex-col space-y-4 mt-4">
+        <button
+          onclick="openWazeRoute()"
+          class="btn bg-blue-600 hover:bg-blue-700"
+        >
+          <i class="fas fa-map-marker-alt"></i> Abrir en Waze
+        </button>
+        <button
+          onclick="openGoogleMapsRoute()"
+          class="btn bg-green-600 hover:bg-green-700"
+        >
+          <i class="fas fa-map"></i> Abrir en Google Maps
+        </button>
+        <button
+          onclick="openNearbyRestaurants()"
+          class="btn bg-yellow-500 hover:bg-yellow-600"
+        >
+          <i class="fas fa-utensils"></i> Ver dónde comer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: WhatsApp -->
+  <div id="whatsappModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('whatsappModal')">&times;</span>
+      <h2 class="text-2xl font-bold mb-4">¿Qué quieres hacer con WhatsApp?</h2>
+      <div class="flex flex-col space-y-4 mt-4">
+        <button
+          class="btn bg-blue-600 hover:bg-blue-700"
+          onclick="notifyArrivalTime()"
+        >
+          <i class="fas fa-clock"></i> Notificar llegada técnicos (5 minutos)
+        </button>
+        <button
+          class="btn bg-yellow-500 hover:bg-yellow-600"
+          onclick="notifyVisitTime()"
+        >
+          <i class="fas fa-calendar-alt"></i> Notificar hora de visita
+        </button>
+        <button
+          class="btn bg-red-600 hover:bg-red-700"
+          onclick="openOnTheWayPrompt()"
+        >
+          <i class="fas fa-road"></i> Notificar en camino
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio Notificaciones -->
+  <audio id="successSound" src="listo.mp3"></audio>
+  <audio id="errorSound" src="error.mp3"></audio>
+
+  <!-- Socket.IO, Moment.js, etc. -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data.min.js"
+  ></script>
+
+  <script>
+    /* 
+      Mantenemos la lógica y funciones originales,
+      asegurando la tabla sea scrollable (table-responsive)
+      y la sección de ganancias esté dentro del dashboard.
+    */
+
+    const webhookUrls = {
+      'terminate-visit': 'https://webhook.wolftec.cl/webhook/f74d15d2-105b-416b-800d-6d4bd1eab145',
+      'cobrar': 'https://webhook.wolftec.cl/webhook/8577b6db-e20e-4a75-bf98-d9f05190de5a',
+      'notify-arrival': 'https://webhook.wolftec.cl/webhook/8b62afcc-569f-4832-b857-a260f067f970',
+      'notify-visit-time': 'https://webhook.wolftec.cl/webhook/c3851852-c5a7-41d5-83e7-4e5a1c61618e',
+      'notify-on-the-way': 'https://webhook.wolftec.cl/webhook/f88f254d-3a41-49fe-aa5f-2171a80a7cdc',
+      'start-visit': 'https://webhook.wolftec.cl/webhook/e0c0b27c-3b21-4e82-b1de-62617378a260',
+      'send-photos': 'https://webhook.wolftec.cl/webhook/c7afa3ae-49d3-4854-99b7-9f52c9e6c2bf'
+    };
+
+    function formatToCLP(value) {
+      return parseFloat(value).toLocaleString('es-CL', {
+        style: 'decimal',
+        maximumFractionDigits: 0
+      });
+    }
+
+    let currentPhoneNumber = '';
+    let currentDateTime = '';
+    let currentClientName = '';
+    let currentAddress = '';
+    let currentType = '';
+    let currentBrand = '';
+    let currentModel = '';
+    let currentTotal = 0;
+    let currentAdvance = 0;
+    let currentBalance = 0;
+    let currentVisitaId = null;
+
+    // Socket.IO
+    const socket = (typeof io !== 'undefined') ? io() : null;
+    if (socket) {
+      socket.on('connect', () => {
+        console.log('Conectado al servidor con Socket.IO');
+      });
+    }
+
+    // Abrir modal de WhatsApp
+    function openWhatsAppModal(phone, dateTime, clientName) {
+      currentPhoneNumber = phone;
+      currentDateTime = dateTime;
+      currentClientName = clientName;
+      document.getElementById('whatsappModal').style.display = 'block';
+    }
+
+    // Notificar llegada en 5 min
+    async function notifyArrivalTime() {
+      closeModal('whatsappModal');
+      try {
+        const payload = {
+          phone: currentPhoneNumber,
+          name: currentClientName,
+          address: currentAddress,
+          type: currentType,
+          brand: currentBrand,
+          model: currentModel
+        };
+        await fetch(webhookUrls['notify-arrival'], {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        Swal.fire({
+          icon: 'success',
+          title: 'Técnicos llegarán en 5 minutos',
+          text: 'Notificación enviada',
+          background: '#2f2f2f',
+          color: '#ffffff'
+        });
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo notificar la llegada',
+          background: '#2f2f2f',
+          color: '#ffffff'
+        });
+      }
+    }
+
+    // Notificar hora de visita
+    async function notifyVisitTime() {
+      closeModal('whatsappModal');
+      const now = moment().tz('America/Santiago').format('HH:mm');
+      try {
+        const payload = {
+          name: currentClientName,
+          phone: currentPhoneNumber,
+          dateTime: currentDateTime,
+          address: currentAddress,
+          brand: currentBrand,
+          type: currentType,
+          model: currentModel,
+          total: formatToCLP(currentTotal),
+          advance: formatToCLP(currentAdvance),
+          balance: formatToCLP(currentBalance),
+          'hora-actual': now
+        };
+        await fetch(webhookUrls['notify-visit-time'], {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        Swal.fire({
+          icon: 'success',
+          title: 'Hora de visita notificada',
+          background: '#2f2f2f',
+          color: '#ffffff'
+        });
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo notificar la hora de visita',
+          background: '#2f2f2f',
+          color: '#ffffff'
+        });
+      }
+    }
+
+    // Notificar en camino con hora
+    function openOnTheWayPrompt() {
+      closeModal('whatsappModal');
+      Swal.fire({
+        title: 'Indicar hora de llegada al domicilio',
+        input: 'time',
+        inputLabel: 'Hora estimada',
+        inputPlaceholder: 'HH:mm',
+        showCancelButton: true,
+        confirmButtonText: 'Notificar',
+        background: '#2f2f2f',
+        color: '#ffffff',
+        inputAttributes: {
+          step: '300'
+        }
+      }).then(async (result) => {
+        if (result.isConfirmed && result.value) {
+          const horaLlegada = result.value;
+          try {
+            const now = moment().tz('America/Santiago').format('HH:mm');
+            const payload = {
+              name: currentClientName,
+              phone: currentPhoneNumber,
+              address: currentAddress,
+              brand: currentBrand,
+              type: currentType,
+              model: currentModel,
+              total: formatToCLP(currentTotal),
+              advance: formatToCLP(currentAdvance),
+              balance: formatToCLP(currentBalance),
+              'hora-actual': now,
+              'hora-de-llegada': horaLlegada
+            };
+            await fetch(webhookUrls['notify-on-the-way'], {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            Swal.fire({
+              icon: 'success',
+              title: 'Notificación de "En camino"',
+              text: `Llegada estimada: ${horaLlegada}`,
+              background: '#2f2f2f',
+              color: '#ffffff'
+            });
+          } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'No se pudo notificar "En camino".',
+              background: '#2f2f2f',
+              color: '#ffffff'
+            });
+          }
+        }
+      });
+    }
+
+    // Eliminar visita
+    async function eliminarVisita() {
+      if (!currentVisitaId) {
+        console.error('No hay visita para eliminar');
+        return;
+      }
+      const confirmacion = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Esta acción no se puede deshacer.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar',
+        background: '#2f2f2f',
+        color: '#ffffff'
+      });
+      if (confirmacion.isConfirmed) {
+        try {
+          const response = await fetch(`/api/visitas/${currentVisitaId}`, {
+            method: 'DELETE'
+          });
+          if (response.ok) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Eliminado!',
+              text: 'La visita ha sido eliminada.',
+              background: '#2f2f2f',
+              color: '#ffffff'
+            }).then(() => location.reload());
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: 'Error al eliminar la visita.',
+              background: '#2f2f2f',
+              color: '#ffffff'
+            });
+          }
+        } catch (error) {
+          console.error('Error al eliminar la visita:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error interno',
+            background: '#2f2f2f',
+            color: '#ffffff'
+          });
+        }
+      }
+    }
+
+    // Cobrar al cliente
+    async function chargeClient(
+      id,
+      phone,
+      advance,
+      balance,
+      total,
+      name,
+      type,
+      brand,
+      model,
+      address,
+      dateTime
+    ) {
+      const formattedAdvance = formatToCLP(advance);
+      const formattedBalance = formatToCLP(balance);
+      const formattedTotal = formatToCLP(total);
+      try {
+        const payload = {
+          name,
+          phone,
+          advance: formattedAdvance,
+          total: formattedTotal,
+          balance: formattedBalance,
+          type,
+          brand,
+          model,
+          address,
+          dateTime
+        };
+        await fetch(webhookUrls['cobrar'], {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        Swal.fire({
+          icon: 'success',
+          title: 'Cobro enviado',
+          background: '#2f2f2f',
+          color: '#ffffff'
+        });
+      } catch (error) {
+        console.error('Error al enviar cobro:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error interno',
+          text: 'No se pudo enviar el cobro al webhook',
+          background: '#2f2f2f',
+          color: '#ffffff'
+        });
+      }
+    }
+
+    // Iniciar visita
+    async function startVisit(name, phone, address, brand, type, model) {
+      const now = moment().tz('America/Santiago').format('HH:mm');
+      try {
+        const payload = { name, phone, address, brand, type, model, startTime: now };
+        await fetch(webhookUrls['start-visit'], {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        Swal.fire({
+          icon: 'success',
+          title: 'Visita Iniciada',
+          text: 'Notificación de inicio de visita enviada.',
+          background: '#2f2f2f',
+          color: '#ffffff'
+        });
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error interno',
+          background: '#2f2f2f',
+          color: '#ffffff'
+        });
+      }
+    }
+
+    // Terminar visita
+    async function terminateVisit(id, phone, name, address, dateTime, fileUrl, total) {
+      try {
+        const response = await fetch(`/finalizar-visita/${id}`, { method: 'POST' });
+        if (response.ok) {
+          const formattedTotal = formatToCLP(total);
+          const payload = {
+            id,
+            phone,
+            name,
+            address,
+            dateTime,
+            fileUrl,
+            total: formattedTotal
+          };
+          await fetch(webhookUrls['terminate-visit'], {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          Swal.fire({
+            icon: 'success',
+            title: 'Visita finalizada',
+            background: '#2f2f2f',
+            color: '#ffffff'
+          }).then(() => location.reload());
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al finalizar la visita',
+            background: '#2f2f2f',
+            color: '#ffffff'
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error interno al finalizar la visita',
+          background: '#2f2f2f',
+          color: '#ffffff'
+        });
+      }
+    }
+
+    // Cerrar modal
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Actualizar fecha/hora de visita
+    async function updateDate(event) {
+      event.preventDefault();
+      const id = document.getElementById('updateId').value;
+      const newDate = document.getElementById('newDate').value;
+      const newTime = document.getElementById('newTime').value;
+      try {
+        const response = await fetch('/update-date', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, newDate, newTime })
+        });
+        if (response.ok) {
+          await fetch(webhookUrls['notify-visit-time'], {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, newDate, newTime })
+          });
+          Swal.fire({
+            icon: 'success',
+            title: 'Hora actualizada correctamente',
+            background: '#2f2f2f',
+            color: '#ffffff'
+          });
+          setTimeout(() => {
+            closeModal('fechaModal');
+            location.reload();
+          }, 3000);
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al actualizar la hora',
+            background: '#2f2f2f',
+            color: '#ffffff'
+          });
+        }
+      } catch (error) {
+        console.error('Error al actualizar fecha/hora:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error interno',
+          background: '#2f2f2f',
+          color: '#ffffff'
+        });
+      }
+    }
+
+    // Subir fotos
+    let currentNameForPhotos = '';
+    let currentPhoneForPhotos = '';
+    function openUploadModal(name, phone) {
+      currentNameForPhotos = name;
+      currentPhoneForPhotos = phone;
+      document.getElementById('photoFiles').value = "";
+      document.getElementById('uploadModal').style.display = 'block';
+    }
+    async function sendPhotos() {
+      const files = document.getElementById('photoFiles').files;
+      if (files.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Sin archivos',
+          text: 'Selecciona al menos una foto.',
+          background: '#2f2f2f',
+          color: '#ffffff'
+        });
+        return;
+      }
+      const formData = new FormData();
+      for (let i = 0; i < Math.min(files.length, 4); i++) {
+        formData.append('files', files[i]);
+      }
+      try {
+        const uploadResponse = await fetch('/upload-files', {
+          method: 'POST',
+          body: formData
+        });
+        if (!uploadResponse.ok) {
+          throw new Error('Error al subir archivos');
+        }
+        const uploadData = await uploadResponse.json();
+        const urls = uploadData.urls || [];
+        await fetch(webhookUrls['send-photos'], {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: currentNameForPhotos,
+            phone: currentPhoneForPhotos,
+            url1: urls[0] || '',
+            url2: urls[1] || '',
+            url3: urls[2] || '',
+            url4: urls[3] || ''
+          })
+        });
+        Swal.fire({
+          icon: 'success',
+          title: 'Fotos enviadas',
+          text: 'Se han enviado las fotos correctamente.',
+          background: '#2f2f2f',
+          color: '#ffffff'
+        });
+        closeModal('uploadModal');
+      } catch (error) {
+        console.error('Error al enviar fotos:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudieron enviar las fotos.',
+          background: '#2f2f2f',
+          color: '#ffffff'
+        });
+      }
+    }
+
+    // Ver ruta
+    let currentAddressRoute = '';
+    function openRouteModal(address) {
+      currentAddressRoute = address;
+      document.getElementById('routeModal').style.display = 'block';
+    }
+    function openWazeRoute() {
+      const address = encodeURIComponent(currentAddressRoute);
+      window.open(`https://waze.com/ul?q=${address}`, '_blank');
+    }
+    function openGoogleMapsRoute() {
+      const address = encodeURIComponent(currentAddressRoute);
+      window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
+    }
+    function openNearbyRestaurants() {
+      const address = encodeURIComponent(currentAddressRoute);
+      window.open(`https://www.google.com/maps/search/?api=1&query=restaurants+near+${address}`, '_blank');
+    }
+
+    // Actualizar estado de conexión
+    function updateConnectionStatus(isConnected) {
+      const wifiIcon = document.getElementById('wifiIcon');
+      const wifiText = document.getElementById('wifiText');
+      if (isConnected) {
+        wifiIcon.classList.remove('wifi-disconnected');
+        wifiIcon.classList.add('wifi-connected');
+        wifiText.classList.remove('wifi-disconnected');
+        wifiText.classList.add('wifi-connected');
+        wifiText.textContent = 'Conectado';
+      } else {
+        wifiIcon.classList.remove('wifi-connected');
+        wifiIcon.classList.add('wifi-disconnected');
+        wifiText.classList.remove('wifi-connected');
+        wifiText.classList.add('wifi-disconnected');
+        wifiText.textContent = 'Desconectado';
+      }
+    }
+    async function checkServerConnection() {
+      try {
+        const response = await fetch('https://portal.wolftec.cl');
+        if (response.ok) updateConnectionStatus(true);
+        else updateConnectionStatus(false);
+      } catch (error) {
+        updateConnectionStatus(false);
+      }
+    }
+    setInterval(checkServerConnection, 1000);
+
+    // Actualizar hora en footer
+    function updateDateTime() {
+      const options = {
+        timeZone: 'America/Santiago',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      };
+      const currentDateTime = new Date().toLocaleString('es-CL', options);
+      document.getElementById('current-datetime').textContent = currentDateTime;
+    }
+    setInterval(updateDateTime, 1000);
+
+    // Sidebar en móvil
+    const menuIcon = document.getElementById('menuIcon');
+    const sidebar = document.getElementById('sidebar');
+    menuIcon.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 769) {
+        sidebar.classList.add('open');
+      } else {
+        sidebar.classList.remove('open');
+      }
+    });
+
+    // Cargar visitas pendientes y calcular ganancias
+    async function cargarVisitasPendientes() {
+      try {
+        const response = await fetch('/visitas-pendientes');
+        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+        const visitas = await response.json();
+        const agendaBody = document.getElementById('agendaBody');
+        agendaBody.innerHTML = '';
+
+        // Objeto para almacenar las ganancias por fecha
+        const totalesPorFecha = {};
+
+        visitas.forEach((visita) => {
+          const row = document.createElement('tr');
+          const total = parseFloat(visita.total) || 0;
+          const advance = parseFloat(visita.advance) || 0;
+          const balance = parseFloat(visita.balance) || 0;
+
+          const fechaHoraVisita = moment(visita.date, 'DD/MM/YYYY HH:mm').format('DD/MM/YYYY HH:mm');
+          const fechaSoloVisita = moment(visita.date, 'DD/MM/YYYY HH:mm').format('DD/MM/YYYY');
+
+          // Sumar total a la fecha
+          if (totalesPorFecha[fechaSoloVisita]) {
+            totalesPorFecha[fechaSoloVisita] += total;
+          } else {
+            totalesPorFecha[fechaSoloVisita] = total;
+          }
+
+          let fileUrl = '';
+          if (visita.pdf_filename) {
+            fileUrl = `https://portal.wolftec.cl/Comprobantes-general/${visita.pdf_filename}`;
+          }
+
+          row.innerHTML = `
+            <td>${visita.type || 'N/A'}, ${visita.brand || 'N/A'}, ${visita.model || 'N/A'}</td>
+            <td>${visita.name || 'N/A'}</td>
+            <td>
+              ${visita.address || 'N/A'}
+              <br>
+              <button
+                class="btn route-button"
+                onclick="openRouteModal('${visita.address || ''}')"
+              >
+                <i class="fas fa-map-marker-alt"></i> Ver Ruta
+              </button>
+            </td>
+            <td>
+              ${visita.phone || 'N/A'}
+              <br>
+              <button
+                class="btn whatsapp-button"
+                onclick="
+                  currentAddress='${visita.address || ''}';
+                  currentType='${visita.type || ''}';
+                  currentBrand='${visita.brand || ''}';
+                  currentModel='${visita.model || ''}';
+                  currentTotal=${total};
+                  currentAdvance=${advance};
+                  currentBalance=${balance};
+                  currentVisitaId=${visita.id};
+                  openWhatsAppModal('${visita.phone || ''}', '${visita.date || ''}', '${visita.name || ''}');
+                "
+              >
+                <i class="fab fa-whatsapp"></i> WhatsApp
+              </button>
+            </td>
+            <td>
+              <span class="text-xl font-bold text-yellow-300">
+                ${fechaHoraVisita}
+              </span>
+            </td>
+            <td>
+              Total: ${total.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}<br>
+              Adelanto: ${advance.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}<br>
+              Saldo: ${balance.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}
+            </td>
+            <td>
+              <button
+                class="btn start-visit-button"
+                onclick="
+                  startVisit(
+                    '${visita.name || ''}',
+                    '${visita.phone || ''}',
+                    '${visita.address || ''}',
+                    '${visita.brand || ''}',
+                    '${visita.type || ''}',
+                    '${visita.model || ''}'
+                  )
+                "
+              >
+                <i class='fas fa-play'></i> Iniciar
+              </button>
+              <br>
+              <button
+                class="btn terminate-button"
+                onclick="
+                  terminateVisit(
+                    ${visita.id},
+                    '${visita.phone || ''}',
+                    '${visita.name || ''}',
+                    '${visita.address || ''}',
+                    '${visita.date || ''}',
+                    '${fileUrl}',
+                    ${total}
+                  )
+                "
+              >
+                <i class='fas fa-check-circle'></i> Terminar
+              </button>
+              <br>
+              <button
+                class="btn charge-button"
+                onclick="
+                  chargeClient(
+                    ${visita.id},
+                    '${visita.phone || ''}',
+                    ${advance},
+                    ${balance},
+                    ${total},
+                    '${visita.name || ''}',
+                    '${visita.type || ''}',
+                    '${visita.brand || ''}',
+                    '${visita.model || ''}',
+                    '${visita.address || ''}',
+                    '${visita.date || ''}'
+                  )
+                "
+              >
+                <i class='fas fa-money-bill-wave'></i> Cobrar
+              </button>
+              <br>
+              <button
+                class="btn upload-photos-button"
+                onclick="openUploadModal('${visita.name || ''}', '${visita.phone || ''}')"
+              >
+                <i class='fas fa-image'></i> Fotos
+              </button>
+            </td>
+          `;
+          agendaBody.appendChild(row);
+        });
+
+        mostrarGananciasPorDia(totalesPorFecha);
+      } catch (error) {
+        console.error('Error al cargar visitas:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error interno',
+          background: '#2f2f2f',
+          color: '#ffffff'
+        });
+      }
+    }
+
+    // Mostrar ganancias por día en la lista #totalesPorDia
+    function mostrarGananciasPorDia(totalesPorFecha) {
+      const totalesPorDiaUl = document.getElementById('totalesPorDia');
+      totalesPorDiaUl.innerHTML = '';
+
+      const fechasOrdenadas = Object.keys(totalesPorFecha).sort((a, b) => {
+        return moment(a, 'DD/MM/YYYY') - moment(b, 'DD/MM/YYYY');
+      });
+
+      if (fechasOrdenadas.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = 'No hay ganancias registradas.';
+        totalesPorDiaUl.appendChild(li);
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+      fechasOrdenadas.forEach((fecha) => {
+        const ganancia = totalesPorFecha[fecha];
+        const li = document.createElement('li');
+        li.textContent = `${fecha}: ${ganancia.toLocaleString('es-CL', {
+          style: 'currency',
+          currency: 'CLP',
+        })}`;
+        fragment.appendChild(li);
+      });
+      totalesPorDiaUl.appendChild(fragment);
+    }
+
+    // Al cargar la página
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarVisitasPendientes();
+      updateDateTime(); // Iniciar footer
+    });
+  </script>
+</body>
+</html>
