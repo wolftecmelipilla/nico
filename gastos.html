@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>| Control de Gastos | TecnicoMelipilla.cl |</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-image: url("bg.jpg");
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: rgba(18, 41, 49, 0.9);
+            color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 0.25rem;
+            font-size: 1rem;
+            background-color: #1a3742;
+            color: white;
+        }
+
+        .expense-item {
+            background-color: #122931;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .expense-details {
+            text-transform: uppercase;
+        }
+
+        .expense-description {
+            text-transform: uppercase;
+        }
+
+        .expense-amount {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .expense-actions button {
+            background-color: #51c66c;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            border: none;
+        }
+
+        .expense-actions button:hover {
+            background-color: #3aa956;
+        }
+
+        .total-summary {
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            margin-top: 1rem;
+            color: black;
+        }
+
+        /* Category labels */
+        .category-label {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-right: 0.5rem;
+        }
+
+        .category-combustible {
+            background-color: #ffadad;
+            color: #7a0000;
+        }
+
+        .category-alimentacion {
+            background-color: #ffd6a5;
+            color: #7a4000;
+        }
+
+        .category-insumos {
+            background-color: #fdffb6;
+            color: #7a7a00;
+        }
+
+        .category-herramientas {
+            background-color: #caffbf;
+            color: #007a00;
+        }
+
+        .category-otros {
+            background-color: #9bf6ff;
+            color: #00577a;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 250px;
+            background-color: #122931;
+            color: white;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: start;
+            transition: transform 0.3s ease;
+            overflow: hidden;
+            z-index: 999;
+        }
+
+        .sidebar img {
+            width: 150px;
+            margin: 0 auto 20px auto;
+            display: block;
+        }
+
+        .sidebar a {
+            padding: 15px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #51c66c;
+            color: white;
+        }
+
+        .sidebar i {
+            margin-right: 10px;
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar.collapsed img {
+            width: 40px;
+            margin: 10px auto;
+        }
+
+        .sidebar.collapsed a span {
+            display: none;
+        }
+
+        .toggle-btn {
+            position: fixed;
+            top: 20px;
+            left: 250px;
+            background-color: #51c66c;
+            border-radius: 50%;
+            border: none;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s ease, left 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toggle-btn.collapsed {
+            left: 60px;
+            transform: rotate(180deg);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .toggle-btn {
+                left: 10px;
+            }
+        }
+
+        .sidebar a.active {
+            background-color: #3aa956;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Table styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th,
+        td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #122931;
+            color: white;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #122931;
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar" id="sidebar">
+        <img src="logo.png" alt="Logo">
+        <a href="index.html"><i class="fas fa-home"></i><span>Inicio</span></a>
+        <a href="ingreso-clientes.html"><i class="fas fa-user-plus"></i><span>Ingresar cliente</span></a>
+        <a href="revisar-agenda.html"><i class="fas fa-calendar-alt"></i><span>Calendario</span></a>
+        <a href="pendientes.html"><i class="fas fa-tasks"></i><span>Trabajos pendientes</span></a>
+        <a href="lista-clientes.html"><i class="fas fa-users"></i><span>Control de clientes</span></a>
+        <a href="gastos.html" class="active"><i class="fas fa-wallet"></i><span>Gastos diarios</span></a>
+    </div>
+
+    <!-- Toggle Button -->
+    <button class="toggle-btn" id="toggleBtn">
+        <i class="fas fa-arrow-left"></i>
+    </button>
+
+    <div class="container">
+        <h1 class="text-3xl font-bold mb-4">Control de Gastos</h1>
+
+        <!-- Formulario para agregar gastos -->
+        <div class="bg-[#122931] p-4 rounded shadow-md mb-6">
+            <h2 class="text-xl font-bold mb-4">Agregar un nuevo gasto</h2>
+            <form id="expenseForm">
+                <div class="form-group">
+                    <label for="detalle">Descripción del gasto</label>
+                    <input type="text" id="detalle" name="detalle" placeholder="Ej. Combustible" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Categoría</label>
+                    <select id="category" name="category" required>
+                        <option value="">Seleccionar categoría</option>
+                        <option value="Combustible">Combustible</option>
+                        <option value="Alimentación">Alimentación</option>
+                        <option value="Insumos">Insumos</option>
+                        <option value="Herramientas">Herramientas</option>
+                        <option value="Otros">Otros</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Monto</label>
+                    <input type="text" id="amount" name="amount" placeholder="Ej. 15.000" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="payer">Pagado por</label>
+                    <select id="payer" name="payer" required>
+                        <option value="">Seleccionar pagador</option>
+                        <option value="Nicolas">Nicolas</option>
+                        <option value="Carlos A">Carlos A</option>
+                        <option value="Wolftec Efectivo">Wolftec Efectivo</option>
+                        <option value="Wolftec Banco">Wolftec Banco</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Fecha</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                    Agregar Gasto
+                </button>
+            </form>
+        </div>
+
+        <!-- Lista de gastos -->
+        <div>
+            <h2 class="text-xl font-bold mb-4">Lista de gastos</h2>
+            <div id="expenseList">
+                <!-- Aquí se mostrarán los gastos -->
+            </div>
+        </div>
+
+        <!-- Resumen de total de gastos -->
+        <div class="total-summary">
+            <h2 class="text-xl font-bold">Resumen de gastos</h2>
+            <p>Total Gastado: <span id="totalSpent">$0</span></p>
+            <h3 class="text-lg font-bold mt-4">Total por Pagador</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pagador</th>
+                        <th class="text-right">Total Pagado</th>
+                    </tr>
+                </thead>
+                <tbody id="pagadorSummaryTable">
+                    <!-- Aquí se mostrarán los totales por cada pagador -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 TM SpA. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        const expenseForm = document.getElementById('expenseForm');
+        const expenseList = document.getElementById('expenseList');
+        const totalSpent = document.getElementById('totalSpent');
+        const pagadorSummaryTable = document.getElementById('pagadorSummaryTable');
+        let expenses = [];
+
+        // Formatear el campo de monto con puntos como separadores de miles mientras el usuario escribe
+        document.getElementById('amount').addEventListener('input', function (e) {
+            let value = e.target.value;
+
+            // Remover cualquier carácter no numérico
+            value = value.replace(/\D/g, '');
+
+            // Agregar puntos como separadores de miles
+            value = new Intl.NumberFormat('es-CL').format(value);
+
+            // Actualizar el valor formateado en el input
+            e.target.value = value;
+        });
+
+        // Función para eliminar los puntos del monto antes de enviarlo al servidor
+        function parseAmount(value) {
+            return value.replace(/\./g, '');
+        }
+
+        // Función para cargar los gastos desde el servidor
+        async function loadExpenses() {
+            try {
+                const response = await fetch('/api/gastos');
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.statusText}`);
+                }
+                expenses = await response.json();
+                renderExpenses();
+            } catch (error) {
+                console.error('Error al cargar los gastos:', error);
+            }
+        }
+
+        // Función para cargar el resumen de gastos desde el servidor
+        async function loadExpenseSummary() {
+            try {
+                const response = await fetch('/api/gastos/resumen');
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.statusText}`);
+                }
+                const data = await response.json();
+
+                // Mostrar el total global
+                totalSpent.textContent = formatCurrency(data.total_gastado);
+
+                // Mostrar los totales por cada pagador
+                pagadorSummaryTable.innerHTML = ''; // Limpiar antes de mostrar los nuevos datos
+                data.por_pagador.forEach(pagador => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${pagador.pagado_por}</td>
+                        <td class="text-right">${formatCurrency(pagador.total_pagado)}</td>
+                    `;
+                    pagadorSummaryTable.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error('Error al cargar el resumen de gastos:', error);
+            }
+        }
+
+        // Cargar los gastos y el resumen al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            loadExpenses(); // Cargar lista de gastos
+            loadExpenseSummary(); // Cargar resumen de gastos
+        });
+
+        // Función para agregar un gasto
+        expenseForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const detalle = document.getElementById('detalle').value;
+            const category = document.getElementById('category').value;
+            const amount = parseInt(parseAmount(document.getElementById('amount').value), 10); // Desformatear el monto
+            const payer = document.getElementById('payer').value;
+            const date = document.getElementById('date').value;
+
+            const newExpense = {
+                detalle: detalle,
+                tipo_gasto: category,
+                monto: amount,
+                pagado_por: payer,
+                fecha: date
+            };
+
+            try {
+                const response = await fetch('/api/gastos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newExpense)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al agregar el gasto');
+                }
+
+                const expense = await response.json();
+                expenses.push(expense);
+                renderExpenses();
+                loadExpenseSummary(); // Actualizar el total después de agregar un gasto
+
+                // Mostrar alerta de éxito
+                Swal.fire({
+                    title: '¡Gasto agregado!',
+                    text: 'El gasto ha sido agregado correctamente.',
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar'
+                });
+
+                // Limpiar el formulario
+                expenseForm.reset();
+            } catch (error) {
+                console.error('Error al agregar el gasto:', error);
+            }
+        });
+
+        // Función para renderizar los gastos
+        function renderExpenses() {
+            expenseList.innerHTML = '';
+            expenses.forEach(expense => {
+                const expenseItem = document.createElement('div');
+                expenseItem.classList.add('expense-item');
+
+                // Obtener la clase de categoría
+                const categoryClass = getCategoryClass(expense.tipo_gasto);
+
+                // Convertir la fecha al formato local de Chile (Santiago, UTC-3)
+                const formattedDate = formatDateToLocal(expense.fecha);
+
+                expenseItem.innerHTML = `
+                    <div class="expense-details">
+                        <strong>${expense.pagado_por}</strong><br>
+                        <span class="category-label ${categoryClass}">${expense.tipo_gasto}</span>
+                        <span class="expense-description">${expense.detalle}</span><br>
+                        <span>${formattedDate}</span>
+                    </div>
+                    <div class="expense-amount">
+                        <span>${formatCurrency(expense.monto)}</span>
+                    </div>
+                    <div class="expense-actions">
+                        <button onclick="deleteExpense(${expense.id})">Eliminar</button>
+                    </div>
+                `;
+                expenseList.appendChild(expenseItem);
+            });
+        }
+
+        // Función para formatear la fecha al formato de Santiago, Chile
+        function formatDateToLocal(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('es-CL', {
+                timeZone: 'America/Santiago',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+        }
+
+        // Función para obtener la clase de categoría
+        function getCategoryClass(category) {
+            const categoryMap = {
+                'Combustible': 'category-combustible',
+                'Alimentación': 'category-alimentacion',
+                'Insumos': 'category-insumos',
+                'Herramientas': 'category-herramientas',
+                'Otros': 'category-otros'
+            };
+            return categoryMap[category] || 'category-otros';
+        }
+
+        // Función para eliminar un gasto
+        async function deleteExpense(id) {
+            const confirm = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: '¡No podrás revertir esta acción!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminarlo',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (confirm.isConfirmed) {
+                try {
+                    const response = await fetch(`/api/gastos/${id}`, { method: 'DELETE' });
+
+                    if (!response.ok) {
+                        throw new Error('Error al eliminar el gasto');
+                    }
+
+                    expenses = expenses.filter(expense => expense.id !== id);
+                    renderExpenses();
+                    loadExpenseSummary(); // Actualizar el total después de eliminar un gasto
+
+                    Swal.fire({
+                        title: '¡Eliminado!',
+                        text: 'El gasto ha sido eliminado.',
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar'
+                    });
+                } catch (error) {
+                    console.error('Error al eliminar el gasto:', error);
+                }
+            }
+        }
+
+        // Función para formatear números a moneda chilena
+        function formatCurrency(value) {
+            if (typeof value !== 'number') {
+                value = parseInt(value, 10); // Asegurarse de que value es un número
+            }
+            return value.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 });
+        }
+    </script>
+</body>
+
+</html>
